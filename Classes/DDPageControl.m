@@ -29,6 +29,12 @@
 #pragma mark -
 #pragma mark Initializers - dealloc
 
+- (void)setup
+{
+    UIGestureRecognizer	*tapGesture = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)] autorelease];
+	[self addGestureRecognizer:tapGesture];
+}
+
 - (id)initWithType:(DDPageControlType)theType
 {
 	self = [self initWithFrame: CGRectZero] ;
@@ -47,6 +53,7 @@
 	if ((self = [super initWithFrame: CGRectZero]))
 	{
 		self.backgroundColor = [UIColor clearColor] ;
+        [self setup];
 	}
 	return self ;
 }
@@ -266,20 +273,23 @@
 #pragma mark -
 #pragma mark Touches handlers
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+- (void)tapAction:(UITapGestureRecognizer*)gesture
 {
-	// get the touch location
-	UITouch *theTouch = [touches anyObject] ;
-	CGPoint touchLocation = [theTouch locationInView: self] ;
-	
-	// check whether the touch is in the right or left hand-side of the control
-	if (touchLocation.x < (self.bounds.size.width / 2))
-		self.currentPage = MAX(self.currentPage - 1, 0) ;
-	else
-		self.currentPage = MIN(self.currentPage + 1, numberOfPages - 1) ;
-	
-	// send the value changed action to the target
-	[self sendActionsForControlEvents: UIControlEventValueChanged] ;
+	if (gesture.state == UIGestureRecognizerStateEnded)
+	{
+		CGPoint		location = [gesture locationInView:self];
+        
+        // check whether the touch is in the right or left hand-side of the control
+        if (location.x < (self.bounds.size.width / 2))
+            self.currentPage = MAX(self.currentPage - 1, 0) ;
+        else
+            self.currentPage = MIN(self.currentPage + 1, numberOfPages - 1) ;
+        
+        // send the value changed action to the target
+        [self sendActionsForControlEvents: UIControlEventValueChanged] ;
+
+	}
 }
+
 
 @end
