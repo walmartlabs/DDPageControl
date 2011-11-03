@@ -45,8 +45,8 @@ DDPageControlType ;
 
 @property (nonatomic) DDPageControlType type ;
 
-@property (nonatomic,retain) UIColor *onColor ;
-@property (nonatomic,retain) UIColor *offColor ;
+@property (nonatomic,strong) UIColor *onColor ;
+@property (nonatomic,strong) UIColor *offColor ;
 
 @property (nonatomic) CGFloat indicatorDiameter ;
 @property (nonatomic) CGFloat indicatorSpace ;
