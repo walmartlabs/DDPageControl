@@ -26,6 +26,8 @@
 @synthesize indicatorDiameter ;
 @synthesize indicatorSpace ;
 
+@synthesize showVertical ;
+
 #pragma mark -
 #pragma mark Initializers - dealloc
 
@@ -79,8 +81,18 @@
 	// geometry
 	CGRect currentBounds = self.bounds ;
 	CGFloat dotsWidth = self.numberOfPages * diameter + MAX(0, self.numberOfPages - 1) * space ;
-	CGFloat x = CGRectGetMidX(currentBounds) - dotsWidth / 2 ;
-	CGFloat y = CGRectGetMidY(currentBounds) - diameter / 2 ;
+	CGFloat x;
+	CGFloat y;
+	if (showVertical)
+	{
+		x = CGRectGetMidX(currentBounds) - diameter / 2 ;
+		y = CGRectGetMidY(currentBounds) - dotsWidth / 2 ;
+	}
+	else
+	{
+		x = CGRectGetMidX(currentBounds) - dotsWidth / 2 ;
+		y = CGRectGetMidY(currentBounds) - diameter / 2 ;
+	}
 	
 	// get the caller's colors it they have been set or use the defaults
 	CGColorRef onColorCG = onColor ? onColor.CGColor : [UIColor colorWithWhite: 1.0f alpha: 1.0f].CGColor ;
@@ -118,7 +130,14 @@
 			}
 		}
 		
-		x += diameter + space ;
+		if (showVertical)
+		{
+			y += diameter + space ;
+		}
+		else
+		{
+			x += diameter + space ;
+		}
 	}
 	
 	// restore the context
@@ -219,6 +238,16 @@
 	[self setNeedsDisplay] ;
 }
 
+- (void)setShowVertical:(BOOL)show
+{
+	showVertical = show ;
+	
+	// correct the bounds accordingly
+	self.bounds = self.bounds ;
+	
+	[self setNeedsDisplay] ;
+}
+
 - (void)setFrame:(CGRect)aFrame
 {
 	// we do not allow the caller to modify the size struct in the frame so we compute it
@@ -252,8 +281,17 @@
 {
 	CGFloat diameter = (indicatorDiameter > 0) ? indicatorDiameter : kDotDiameter ;
 	CGFloat space = (indicatorSpace > 0) ? indicatorSpace : kDotSpace ;
-	
-	return CGSizeMake(pageCount * diameter + (pageCount - 1) * space + 44.0f, MAX(44.0f, diameter + 4.0f)) ;
+	CGSize retSize;
+	retSize.width = pageCount * diameter + (pageCount - 1) * space + 44.0f;
+	retSize.height = MAX(44.0f, diameter + 4.0f);
+	if (showVertical)
+	{
+		// swap the dimensions for vertical orientation
+		CGFloat tmp = retSize.width;
+		retSize.width = retSize.height;
+		retSize.height = tmp;
+	}
+	return retSize ;
 }
 
 
@@ -265,9 +303,17 @@
 	if (gesture.state == UIGestureRecognizerStateEnded)
 	{
 		CGPoint		location = [gesture locationInView:self];
-        
+        BOOL goBack;
+		if (showVertical)
+		{
+			goBack = location.y < (self.bounds.size.height / 2);
+		}
+		else
+		{
+			goBack = location.x < (self.bounds.size.width / 2);
+		}
         // check whether the touch is in the right or left hand-side of the control
-        if (location.x < (self.bounds.size.width / 2))
+        if (goBack)
             self.currentPage = MAX(self.currentPage - 1, 0) ;
         else
             self.currentPage = MIN(self.currentPage + 1, numberOfPages - 1) ;

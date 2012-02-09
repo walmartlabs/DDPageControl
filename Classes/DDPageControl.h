@@ -51,5 +51,7 @@ DDPageControlType ;
 @property (nonatomic) CGFloat indicatorDiameter ;
 @property (nonatomic) CGFloat indicatorSpace ;
 
+@property (nonatomic) BOOL showVertical ;
+
 @end
 
